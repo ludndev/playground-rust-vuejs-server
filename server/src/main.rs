@@ -34,8 +34,13 @@ fn handle_request(mut stream: TcpStream) -> io::Result<()> {
             if let Some(url_param) = query.split('&')
                 .find(|p| p.starts_with("url="))
                 .and_then(|p| p.split('=').nth(1)) {
-                // raplace %2F to /
-                requested_path = url_param.replace("%2F", "/");
+                
+                requested_path = url_param.to_string();
+                requested_path = requested_path.replace("%25", "%"); // replace %25 by %
+                requested_path = requested_path.replace("%2F", "/"); // replace %2F by /
+                requested_path = requested_path.replace("%3A", ":"); // replace %3A by :
+
+                println!("  > debug: requested_path: {}", requested_path);
             }
         }
     } else {
