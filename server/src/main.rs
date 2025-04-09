@@ -3,6 +3,7 @@ use std::io::{self, Read, Write};
 use std::net::{TcpListener, TcpStream};
 use std::path::Path;
 use std::str;
+use std::thread;
 
 const WEB_ROOT: &str = "./../web/dist";
 
@@ -98,9 +99,12 @@ fn start_server(address: &str) -> io::Result<()> {
     for stream in listener.incoming() {
         match stream {
             Ok(stream) => {
-                if let Err(e) = handle_request(stream) {
-                    eprintln!("Error handling request: {}", e);
-                }
+                // Spawn a new thread for each connection
+                thread::spawn(move || {
+                    if let Err(e) = handle_request(stream) {
+                        eprintln!("Error handling request: {}", e);
+                    }
+                });
             }
             Err(e) => eprintln!("Connection failed: {}", e),
         }
