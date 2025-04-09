@@ -43,6 +43,14 @@ cargo run -- --dir path/to/web/root
 
 If you are following this repository structure, no need to set `--dir` as default dir is set to `web/dist`.
 
+### With Vue.js SPA
+
+With Vue.js SPA, you can use the following command to run the server. Note that the `--dir` option is set to `../web/dist` for our demo Vue.js app. Feel free to adapt `--dir` to your actual path.
+
+```bash
+cargo run -- --dir ../web/dist
+```
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
