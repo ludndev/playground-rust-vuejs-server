@@ -26,7 +26,25 @@ fn handle_request(mut stream: TcpStream) -> io::Result<()> {
     }
 
     let mut requested_path = parts[1].to_string();
-    requested_path = requested_path.split('?').next().unwrap_or("").to_string();
+    
+    // handle Next.js image route
+    if requested_path.starts_with("/_next/image") {
+        // use urlencoding dependency to make it simple
+        if let Some(query) = parts[1].split('?').nth(1) {
+            if let Some(url_param) = query.split('&')
+                .find(|p| p.starts_with("url="))
+                .and_then(|p| p.split('=').nth(1)) {
+                // raplace %2F to /
+                requested_path = url_param.replace("%2F", "/");
+            }
+        }
+    } else {
+        requested_path = requested_path
+            .split('?')
+            .next()
+            .unwrap_or("")
+            .to_string();
+    }
     
     if requested_path == "/" {
         requested_path = "/index.html".to_string();
