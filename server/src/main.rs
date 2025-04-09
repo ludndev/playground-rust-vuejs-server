@@ -35,39 +35,7 @@ fn handle_request(mut stream: TcpStream) -> io::Result<()> {
     let file_path = Path::new(web_root).join(requested_path.trim_start_matches('/'));
     println!("    [GET] 200 {}", requested_path);
 
-    let content_type = match file_path.extension().and_then(|e| e.to_str()) {
-        Some("html") | Some("htm") => "text/html",
-        Some("css") => "text/css",
-        Some("js") => "application/javascript",
-        Some("mjs") => "application/javascript",
-        Some("json") => "application/json",
-        Some("xml") => "application/xml",
-        Some("pdf") => "application/pdf",
-        Some("zip") => "application/zip",
-        Some("doc") => "application/msword",
-        Some("docx") => "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        Some("xls") => "application/vnd.ms-excel",
-        Some("xlsx") => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        Some("ico") => "image/x-icon",
-        Some("png") => "image/png",
-        Some("jpg") | Some("jpeg") => "image/jpeg",
-        Some("gif") => "image/gif",
-        Some("svg") => "image/svg+xml",
-        Some("webp") => "image/webp",
-        Some("mp3") => "audio/mpeg",
-        Some("wav") => "audio/wav",
-        Some("mp4") => "video/mp4",
-        Some("webm") => "video/webm",
-        Some("txt") => "text/plain",
-        Some("csv") => "text/csv",
-        Some("md") => "text/markdown",
-        Some("woff") => "font/woff",
-        Some("woff2") => "font/woff2",
-        Some("ttf") => "font/ttf",
-        Some("otf") => "font/otf",
-        Some("eot") => "application/vnd.ms-fontobject",
-        _ => "application/octet-stream",
-    };
+    let content_type = get_content_type(&file_path);
 
     let result = if file_path.exists() && file_path.is_file() {
         match fs::read(&file_path) {
@@ -146,6 +114,42 @@ fn get_root_dir() -> String {
     
     // return default directory
     WEB_ROOT.to_string()
+}
+
+fn get_content_type(file_path: &Path) -> &'static str {
+    match file_path.extension().and_then(|e| e.to_str()) {
+        Some("html") | Some("htm") => "text/html",
+        Some("css") => "text/css",
+        Some("js") => "application/javascript",
+        Some("mjs") => "application/javascript",
+        Some("json") => "application/json",
+        Some("xml") => "application/xml",
+        Some("pdf") => "application/pdf",
+        Some("zip") => "application/zip",
+        Some("doc") => "application/msword",
+        Some("docx") => "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        Some("xls") => "application/vnd.ms-excel",
+        Some("xlsx") => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        Some("ico") => "image/x-icon",
+        Some("png") => "image/png",
+        Some("jpg") | Some("jpeg") => "image/jpeg",
+        Some("gif") => "image/gif",
+        Some("svg") => "image/svg+xml",
+        Some("webp") => "image/webp",
+        Some("mp3") => "audio/mpeg",
+        Some("wav") => "audio/wav",
+        Some("mp4") => "video/mp4",
+        Some("webm") => "video/webm",
+        Some("txt") => "text/plain",
+        Some("csv") => "text/csv",
+        Some("md") => "text/markdown",
+        Some("woff") => "font/woff",
+        Some("woff2") => "font/woff2",
+        Some("ttf") => "font/ttf",
+        Some("otf") => "font/otf",
+        Some("eot") => "application/vnd.ms-fontobject",
+        _ => "application/octet-stream",
+    }
 }
 
 fn main() {
