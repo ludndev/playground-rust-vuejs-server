@@ -63,9 +63,23 @@ fn handle_request(mut stream: TcpStream) -> io::Result<()> {
             }
         }
     } else {
-        println!("    [GET] 404 {}", requested_path);
-        let response = "HTTP/1.1 404 NOT FOUND\r\nContent-Type: text/plain\r\nConnection: close\r\n\r\nFile not found!";
-        stream.write_all(response.as_bytes())
+        println!("    [GET] 200 {} (SPA Route)", requested_path);
+        let index_path = Path::new(web_root).join("index.html");
+        match fs::read(index_path) {
+            Ok(contents) => {
+                let response_headers = format!(
+                    "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
+                    contents.len()
+                );
+                stream.write_all(response_headers.as_bytes())?;
+                stream.write_all(&contents)
+            },
+            Err(e) => {
+                eprintln!("500 Internal Server Error: {}", e);
+                let response = "HTTP/1.1 500 Internal Server Error\r\nContent-Type: text/plain\r\nConnection: close\r\n\r\nError reading index.html";
+                stream.write_all(response.as_bytes())
+            }
+        }
     };
 
     if let Err(e) = result {
