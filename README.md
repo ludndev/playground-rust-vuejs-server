@@ -51,6 +51,59 @@ With Vue.js SPA, you can use the following command to run the server. Note that 
 cargo run -- --dir ../web/dist
 ```
 
+### With Next.js SPA
+
+Here, we are using Next.js as an example. We have used [nobruf/shadcn-landing-page](https://github.com/nobruf/shadcn-landing-page). Our implementation may not cover all cases, but it working for our demo app.
+
+Clone the repository in our project root directory to have a structure like this:
+
+```bash
+.
+├── server/
+├── shadcn-landing-page/
+└── web/
+```
+
+We have added to `nextConfig` in `next.config.js` :
+
+```json
+    output: "export", // we have added this line to enable the export mode
+    distDir: "build", // we have added this line to change the distDir name
+```
+
+to look like this:
+
+```js
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  output: "export", // we have added this line to enable the export mode
+  distDir: "build", // we have added this line to change the distDir name
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "i.pravatar.cc",
+      },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+      },
+      {
+        protocol: "https",
+        hostname: "github.com",
+      },
+    ],
+  },
+};
+
+export default nextConfig;
+```
+And finally, to run the server:
+
+```bash
+cargo run -- --dir ./../shadcn-landing-page/build
+```
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
