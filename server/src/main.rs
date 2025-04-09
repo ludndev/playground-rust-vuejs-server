@@ -1,4 +1,4 @@
-use std::fs;
+use std::{env, fs};
 use std::io::{self, Read, Write};
 use std::net::{TcpListener, TcpStream};
 use std::path::Path;
@@ -7,9 +7,10 @@ use std::str;
 const WEB_ROOT: &str = "./../web/dist";
 
 fn handle_request(mut stream: TcpStream) -> io::Result<()> {
-    #[allow(unused_mut)]
-    let mut web_root = WEB_ROOT;
     let mut buffer = [0; 1024];
+    
+    let binding = get_root_dir();
+    let web_root = binding.as_str();
     
     let bytes_read = stream.read(&mut buffer)?;
     let request = str::from_utf8(&buffer[..bytes_read]).unwrap_or("");
@@ -106,6 +107,19 @@ fn start_server(address: &str) -> io::Result<()> {
     }
 
     Ok(())
+}
+
+fn get_root_dir() -> String {
+    // check if arg --dir is provided
+    let args: Vec<String> = env::args().collect();
+    if let Some(dir_arg_pos) = args.iter().position(|arg| arg == "--dir") {
+        if dir_arg_pos + 1 < args.len() {
+            return args[dir_arg_pos + 1].clone();
+        }
+    }
+    
+    // return default directory
+    WEB_ROOT.to_string()
 }
 
 fn main() {
