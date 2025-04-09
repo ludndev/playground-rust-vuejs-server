@@ -36,9 +36,28 @@ fn handle_request(mut stream: TcpStream) -> io::Result<()> {
                 .and_then(|p| p.split('=').nth(1)) {
                 
                 requested_path = url_param.to_string();
-                requested_path = requested_path.replace("%25", "%"); // replace %25 by %
-                requested_path = requested_path.replace("%2F", "/"); // replace %2F by /
-                requested_path = requested_path.replace("%3A", ":"); // replace %3A by :
+
+                let replacements = [
+                    ("%25", "%"),  // percent sign
+                    ("%20", " "),  // space
+                    ("%2F", "/"),  // forward slash
+                    ("%3A", ":"),  // colon
+                    ("%2D", "-"),  // hyphen
+                    ("%2E", "."),  // period
+                    ("%5F", "_"),  // underscore
+                    ("%7E", "~"),  // tilde
+                    ("%2B", "+"),  // plus
+                    ("%23", "#"),  // hash
+                    ("%3F", "?"),  // question mark
+                    ("%26", "&"),  // ampersand
+                    ("%3D", "="),  // equals
+                    ("%40", "@"),  // at sign
+                    ("%24", "$"),  // dollar sign
+                ];
+
+                for (encoded, decoded) in replacements.iter() {
+                    requested_path = requested_path.replace(encoded, decoded);
+                }
 
                 println!("  > debug: requested_path: {}", requested_path);
             }
