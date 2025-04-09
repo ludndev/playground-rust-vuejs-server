@@ -59,7 +59,18 @@ fn handle_request(mut stream: TcpStream) -> io::Result<()> {
                     requested_path = requested_path.replace(encoded, decoded);
                 }
 
-                println!("  > debug: requested_path: {}", requested_path);
+                // debug output with special handling for URLs
+                if requested_path.starts_with("http://") || requested_path.starts_with("https://") {
+                    // redirect to the actual resource URL
+                    let response = format!(
+                        "HTTP/1.1 302 Found\r\nLocation: {}\r\nConnection: close\r\n\r\n",
+                        requested_path
+                    );
+                    stream.write_all(response.as_bytes())?;
+                    return Ok(());
+                } else {
+                    println!("  > debug: requested_path: {}", requested_path);
+                }
             }
         }
     } else {
