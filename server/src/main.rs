@@ -50,48 +50,45 @@ fn handle_request(mut stream: TcpStream) -> io::Result<()> {
     
     // handle Next.js image route
     if requested_path.starts_with("/_next/image") {
-        // use urlencoding dependency to make it simple
-        if let Some(query) = parts[1].split('?').nth(1) {
-            if let Some(url_param) = query.split('&')
-                .find(|p| p.starts_with("url="))
-                .and_then(|p| p.split('=').nth(1)) {
-                
-                requested_path = url_param.to_string();
+        if let Some(url_param) = query_params.get("url") {
+            requested_path = url_param.to_string();
 
-                let replacements = [
-                    ("%25", "%"),  // percent sign
-                    ("%20", " "),  // space
-                    ("%2F", "/"),  // forward slash
-                    ("%3A", ":"),  // colon
-                    ("%2D", "-"),  // hyphen
-                    ("%2E", "."),  // period
-                    ("%5F", "_"),  // underscore
-                    ("%7E", "~"),  // tilde
-                    ("%2B", "+"),  // plus
-                    ("%23", "#"),  // hash
-                    ("%3F", "?"),  // question mark
-                    ("%26", "&"),  // ampersand
-                    ("%3D", "="),  // equals
-                    ("%40", "@"),  // at sign
-                    ("%24", "$"),  // dollar sign
-                ];
+            let replacements = [
+                ("%25", "%"),  // percent sign
+                ("%20", " "),  // space
+                ("%2F", "/"),  // forward slash
+                ("%3A", ":"),  // colon
+                ("%2D", "-"),  // hyphen
+                ("%2E", "."),  // period
+                ("%5F", "_"),  // underscore
+                ("%7E", "~"),  // tilde
+                ("%2B", "+"),  // plus
+                ("%23", "#"),  // hash
+                ("%3F", "?"),  // question mark
+                ("%26", "&"),  // ampersand
+                ("%3D", "="),  // equals
+                ("%40", "@"),  // at sign
+                ("%24", "$"),  // dollar sign
+            ];
 
-                for (encoded, decoded) in replacements.iter() {
-                    requested_path = requested_path.replace(encoded, decoded);
-                }
+            for (encoded, decoded) in replacements.iter() {
+                requested_path = requested_path.replace(encoded, decoded);
+            }
 
-                // debug output with special handling for URLs
-                if requested_path.starts_with("http://") || requested_path.starts_with("https://") {
-                    // redirect to the actual resource URL
-                    let response = format!(
-                        "HTTP/1.1 302 Found\r\nLocation: {}\r\nConnection: close\r\n\r\n",
-                        requested_path
-                    );
-                    stream.write_all(response.as_bytes())?;
-                    return Ok(());
-                } else {
-                    println!("  > debug: requested_path: /_next/{}", requested_path);
-                }
+            // debug output with special handling for URLs
+            if requested_path.starts_with("http://") || requested_path.starts_with("https://") {
+                let response = format!(
+                    "HTTP/1.1 302 Found\r\nLocation: {}\r\nConnection: close\r\n\r\n",
+                    requested_path
+                );
+                stream.write_all(response.as_bytes())?;
+                return Ok(());
+            } else {
+                let default_width = "0".to_string();
+                let default_quality = "100".to_string();
+                let width = query_params.get("w").unwrap_or(&default_width);
+                let quality = query_params.get("q").unwrap_or(&default_quality);
+                println!("  > debug: image request - path: {}, width: {}, quality: {}", requested_path, width, quality);
             }
         }
     } else {
