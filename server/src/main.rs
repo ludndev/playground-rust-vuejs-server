@@ -4,6 +4,7 @@ use std::net::{TcpListener, TcpStream};
 use std::path::Path;
 use std::str;
 use std::thread;
+use std::collections::HashMap;  // Replace the first line with this combined import
 
 const WEB_ROOT: &str = "./../web/dist";
 
@@ -27,6 +28,23 @@ fn handle_request(mut stream: TcpStream) -> io::Result<()> {
 
     let requested_path_initial = parts[1].to_string();    
     println!("    [GET] 200 {}", requested_path_initial);
+
+    // Parse query parameters
+    let query_params: HashMap<String, String> = if let Some(query) = parts[1].split('?').nth(1) {
+        query.split('&')
+            .filter_map(|param| {
+                let mut parts = param.split('=');
+                match (parts.next(), parts.next()) {
+                    (Some(key), Some(value)) => Some((key.to_string(), value.to_string())),
+                    _ => None,
+                }
+            })
+            .collect()
+    } else {
+        HashMap::new()
+    };
+
+    println!("  > debug: query_params: {:?}", query_params);  // Fixed debug print format
 
     let mut requested_path = requested_path_initial.clone();
     
