@@ -25,7 +25,10 @@ fn handle_request(mut stream: TcpStream) -> io::Result<()> {
         return Ok(());
     }
 
-    let mut requested_path = parts[1].to_string();
+    let requested_path_initial = parts[1].to_string();    
+    println!("    [GET] 200 {}", requested_path_initial);
+
+    let mut requested_path = requested_path_initial.clone();
     
     // handle Next.js image route
     if requested_path.starts_with("/_next/image") {
@@ -69,7 +72,7 @@ fn handle_request(mut stream: TcpStream) -> io::Result<()> {
                     stream.write_all(response.as_bytes())?;
                     return Ok(());
                 } else {
-                    println!("  > debug: requested_path: {}", requested_path);
+                    println!("  > debug: requested_path: /_next/{}", requested_path);
                 }
             }
         }
@@ -86,7 +89,6 @@ fn handle_request(mut stream: TcpStream) -> io::Result<()> {
     }
 
     let file_path = Path::new(web_root).join(requested_path.trim_start_matches('/'));
-    println!("    [GET] 200 {}", requested_path);
 
     let content_type = get_content_type(&file_path);
 
